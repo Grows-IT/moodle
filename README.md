@@ -10,7 +10,7 @@ Estimated running time: 7 minutes.
 ## 2. Install Moodle
 ```
 cd /var/www/html/
-git clone https://github.com/waritsan/moodle.git moodle
+sudo git clone https://github.com/waritsan/moodle.git moodle
 cd moodle/
 sudo git checkout live
 sudo chmod -R 0755 /var/www/html/moodle/
