@@ -12,7 +12,7 @@ Estimated running time: 7 minutes.
 cd /var/www/html/
 git clone https://github.com/waritsan/moodle.git moodle
 cd moodle/
-sudo git checkout live
+sudo git checkout prod
 sudo chmod -R 0755 /var/www/html/moodle/
 sudo mkdir /var/moodledata
 sudo chown -R www-data /var/moodledata/
