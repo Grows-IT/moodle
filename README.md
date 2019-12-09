@@ -12,7 +12,7 @@ Estimated running time: 7 minutes.
 cd /var/www/html/
 git clone https://github.com/waritsan/moodle.git moodle
 cd moodle/
-sudo git checkout prod
+sudo git checkout mfa
 sudo chmod -R 0755 /var/www/html/moodle/
 sudo mkdir /var/moodledata
 sudo chown -R www-data /var/moodledata/
@@ -86,11 +86,13 @@ moodle
 <YOUR_PASSWORD>
 ```
 The setup will run for about 10 minutes.
-When done revert the permission.
+When done revert the permission and restart Apache
 
 ```
 sudo chmod -R 0755 /var/www/html/moodle
+sudo service apache2 restart
 ```
+
 ---
 
 Moodle - the world's open source learning platform
