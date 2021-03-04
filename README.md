@@ -1,116 +1,103 @@
-# Deployment Instruction
-This is a clean install instruction on Ubuntu 18 LTS.
-## 1. Install Apache, MySQL, and PHP
-```
-sudo apt update
-sudo apt install apache2 mysql-server php libapache2-mod-php
-sudo apt install graphviz aspell ghostscript clamav php7.2-pspell php7.2-curl php7.2-gd php7.2-intl php7.2-mysql php7.2-xml php7.2-xmlrpc php7.2-ldap php7.2-zip php7.2-soap php7.2-mbstring
-```
-Estimated running time: 7 minutes.
-## 2. Install Moodle
-```
-cd /var/www/html/
-sudo git clone https://github.com/waritsan/moodle.git moodle
-cd moodle/
-sudo git checkout live
-sudo chmod -R 0755 /var/www/html/moodle/
-sudo mkdir /var/moodledata
-sudo chown -R www-data /var/moodledata/
-sudo chmod -R 777 /var/moodledata/
-```
-Estimated time taken: 5 minutes.
+# How to Deploy MFA on Ubuntu 20.04 LTS
+## 1. Install Apache, MySQL, and PHP 7.4
+Update packages and install required softwares:
+
+    sudo apt update
+    sudo apt install apache2 mysql-server php libapache2-mod-php
+    sudo apt install graphviz aspell ghostscript clamav php7.4-pspell php7.4-curl php7.4-gd php7.4-intl php7.4-mysql php7.4-xml php7.4-xmlrpc php7.4-ldap php7.4-zip php7.4-soap php7.4-mbstring
+    sudo service apache2 restart
+## 2. Install MFA
+Run the following commands to install MFA and set permissions:
+
+    cd /var/www/html/
+    sudo git clone -b prod https://github.com/Grows-IT/moodle.git mfa
+    sudo mkdir /var/mfadata
+    sudo chown -R www-data /var/mfadata/
+    sudo chmod -R 777 /var/mfadata/
+    sudo chmod -R 0755 /var/www/html/mfa/
 ## 3. Setup MySQL Server
-### 3.1 Setup DB root password
-```
-sudo mysql_secure_installation
-```
-Enter '0' for password strength. Create a password. Answer 'y' to all other questions.
+### 3.1 Setup security
 
-```
-sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
-```
-Add the following lines under [mysqld] section
+     sudo mysql_secure_installation
 
-```
-default_storage_engine = innodb
-innodb_file_per_table = 1
-innodb_file_format = Barracuda
-```
-Save with ctrl + x and enter. Then restart MySQL
+> Create a password. Answer 'y' to all other questions.
 
-```
-sudo service mysql restart
-```
-### 3.2 Create Database
-```
-sudo mysql -u root -p
-```
-Enter the password you created in 3.1
+### 3.2 Add Configuration
+Open an editor by running the following command:
 
-```
-CREATE DATABASE moodle DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-create user 'moodle'@'localhost' IDENTIFIED BY '<YOUR_PASSWORD>';
-GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,CREATE TEMPORARY TABLES,DROP,INDEX,ALTER ON moodle.* TO moodle@localhost IDENTIFIED BY '<YOUR_PASSWORD>';
-quit;
-```
-## 4. Setup Moodle
-```
-cd /var/www/html/moodle/admin/cli
-sudo chmod -R 777 /var/www/html/moodle
-sudo -u www-data /usr/bin/php install.php
-```
-Answer the questions below. Otherwise 'enter' the default values.
+    sudo nano /etc/mysql/mysql.conf.d/mysqld.cnf
+> Add the following lines at the end of the file.
+
+    default_storage_engine = innodb
+    innodb_file_per_table = 1
+
+>Press ‘ctrl + x’ to save, answer ‘y’ and enter. Then restart MySQL
+
+      sudo service mysql restart
+
+### 3.3 Create mfa database
+Login:
+
+    sudo mysql -u root -p
+
+> Enter the password you created in step 3.1
+
+  Create database:
+  
+
+    CREATE DATABASE mfa DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+Create user:
+
+    create user 'mfa'@'localhost' IDENTIFIED BY '[password]';
+>  Replace [password] with your own password
+    
+Grant user permissions then quit
+
+    GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,CREATE TEMPORARY TABLES,DROP,INDEX,ALTER ON mfa.* TO 'mfa'@'localhost';
+    quit;
+    
+## 4. Setup MFA
+Execute the setup script:
+
+    cd /var/www/html/mfa/admin/cli
+    sudo chmod -R 777 /var/www/html/mfa
+    sudo -u www-data /usr/bin/php install.php
+    
+> User default values by pressing ‘Enter’, except for the following questions:
+
 == Web address ==
+`http://[server ip]/mfa`
+> Replace [server ip] with the external server IP
 
-```
-http://<server ip>/moodle
-```
 == Data directory ==
+`/var/mfadata`
 
-```
-/var/moodledata
-```
 == Database name ==
+`mfa`
 
-```
-moodle
-```
 == Database user ==
+`mfa`
 
-```
-moodle
-```
 == Databse user password ==
+[password]
+> Replace [password] with the password created in step 3.3 when create user
 
-```
-<YOUR_PASSWORD>
-```
-The setup will run for about 10 minutes.
-When done revert the permission.
+== Full site name ==
+`Modern Farm Academy`
 
-```
-sudo chmod -R 0755 /var/www/html/moodle
-```
----
+== Short name for site (eg single word) ==
+`MFA`
 
-Moodle - the world's open source learning platform
+> Please create your own admin password when prompt.
 
-Moodle <https://moodle.org> is a learning platform designed to provide
-educators, administrators and learners with a single robust, secure and
-integrated system to create personalised learning environments.
+**Note: Once you answered all the questions, the setup will run for about 10 minutes.** 
+When done, visit **http://[server ip]/mfa** to see if the installation is successful.
 
-You can download Moodle <https://download.moodle.org> and run it on your own
-web server, ask one of our Moodle Partners <https://moodle.com/partners/> to
-assist you, or have a MoodleCloud site <https://moodle.com/cloud/> set up for
-you.
-
-Moodle is widely used around the world by universities, schools, companies and
-all manner of organisations and individuals.
-
-Moodle is provided freely as open source software, under the GNU General Public
-License <https://docs.moodle.org/dev/License>.
-
-Moodle is written in PHP and JavaScript and uses an SQL database for storing
-the data.
-
-See <https://docs.moodle.org> for details of Moodle's many features.
+## 5. Enable mobile web service
+1. Visit **http://[server ip]/mfa** 
+2. Login with admin user
+3. On the left hand side menu, navigate to ‘Site Administration’ 
+4. Scroll to the bottom and click ‘Mobile settings’
+5. Check the box for ‘Enable web services for mobile devices’
+6. Click save changes
